@@ -87,6 +87,21 @@ const FlavorBot = () => {
               <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#3A3A3A' }}>
                 {recipe.name}
               </Typography>
+              {recipe.image_url && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1, mb:1 }}>
+                  <img 
+                    src={recipe.image_url} 
+                    alt={recipe.name} 
+                    style={{ 
+                      width: '200px', 
+                      height: '200px', 
+                      objectFit: 'cover', 
+                      borderRadius: '10px' 
+                    }} 
+                  />
+                </Box>
+              )}
+
               <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#555' }}>
                 {recipe.description}
               </Typography>
