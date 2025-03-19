@@ -5,10 +5,12 @@ import json
 import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from rapidfuzz import process
 import pickle
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
 
 # Load trained spaCy model
 MODEL_PATH = "ner_model"
@@ -167,6 +169,7 @@ def process_query():
 def get_substitutes():
     try:
         data = request.json
+        
         ingredients = data.get("ingredients", [])
 
         if not ingredients:
@@ -174,18 +177,21 @@ def get_substitutes():
 
         if not isinstance(ingredients, list):
             ingredients = [ingredients] if ingredients else []
-
+    
         substitutes = []
+        threshold=80
         for ingredient in ingredients:
-            lower_ingredient = ingredient.lower()  
-            if lower_ingredient in SUBSTITUTES:
-                substitutes.extend(SUBSTITUTES[lower_ingredient])
+            matches = process.extract(ingredient, SUBSTITUTES.keys(), score_cutoff=threshold)
+            if matches:
+                best_match = matches[0][0]  # Get the best match (highest score)
+                substitutes.extend(SUBSTITUTES.get(best_match, []))
 
         return jsonify({"substitutes": substitutes})
 
     except Exception as e:
         print(f"ERROR in /get_substitutes: {e}")
         return jsonify({"error": "SORRY, there was an error processing your request."}), 500
+
 
 
 if __name__ == "__main__":

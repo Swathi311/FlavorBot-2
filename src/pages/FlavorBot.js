@@ -68,6 +68,7 @@ const FlavorBot = () => {
     setUserInput("");
 
     if (waitingForIngredients) {
+      console.log(userInput)
       fetchSubstitutes(userInput);
       setWaitingForIngredients(false);
       return;
@@ -176,7 +177,6 @@ const FlavorBot = () => {
     try {
       const response = await axios.post("http://127.0.0.1:8000/get_substitutes", { ingredients });
       const substitutes = response.data.substitutes;
-      console.log(substitutes)
       const botMessage = substitutes.length > 0
         ? `Here are some substitutes: \n${substitutes.join("\n")}`
         : "Sorry, no substitutes found for the given ingredients.";

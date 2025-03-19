@@ -49,7 +49,7 @@
     "fenugreek leaves": ["celery leaves", "dried oregano", "curry leaves"],
     "curry leaves": ["bay leaves", "lime zest", "kaffir lime leaves"],
     "tamarind": ["lemon juice", "vinegar + sugar", "amchur (dry mango powder)"],
-    "amchur": ["tamarind", "lemon juice", "sumac"],
+    "amchur (dried mango powder)": ["tamarind", "lemon juice", "sumac"],
     "jaggery": ["brown sugar", "molasses", "palm sugar"],
     "paneer": ["tofu", "cottage cheese", "ricotta"],
     "coconut oil": ["ghee", "vegetable oil", "butter"],
