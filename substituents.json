@@ -1,6 +1,6 @@
 {
     "butter": ["oil", "margarine", "ghee", "applesauce"],
-    "oil": ["butter", "margarine", "yogurt", "mashed bananas"],
+    "oil": ["butter", "margarine", "yogurt"],
     "milk": ["almond milk", "soy milk", "coconut milk", "water"],
     "cream": ["yogurt", "coconut cream", "evaporated milk", "silken tofu"],
     "yogurt": ["sour cream", "buttermilk", "coconut yogurt"],
