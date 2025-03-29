@@ -6,8 +6,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pickle  
 
-CACHE_FILE = "cached_recipes.json"
-TFIDF_CACHE_FILE = "tfidf_data.pkl"
+CACHE_FILE = "../cached_recipes.json"
+TFIDF_CACHE_FILE = "../tfidf_data.pkl"
 
 # Function to fetch and cache data from Firebase
 def fetch_recipes():
@@ -24,7 +24,7 @@ def fetch_recipes():
 
     # Initialize Firebase if not already initialized
     if not firebase_admin._apps:
-        cred = credentials.Certificate("backend/serviceAccountKey.json")
+        cred = credentials.Certificate("serviceAccountKey.json")
         firebase_admin.initialize_app(cred)
 
     db = firestore.client()
@@ -51,9 +51,6 @@ def fetch_recipes():
                 data = doc.to_dict()
                 recipe_name = data.get("name")
                 recipe_ingredients = data.get("ingredients", [])
-                recipe_cuisine = data.get("cuisine", "Unknown")
-                recipe_diet = data.get("diet", "General")
-                recipe_cook_time = data.get("cook_time", "Unknown")
 
                 # Assign a unique ID to each recipe (avoid duplication)
                 if recipe_name in recipe_ids:
@@ -71,9 +68,7 @@ def fetch_recipes():
                         "ingredients": recipe_ingredients,
                         "instructions": data.get("instructions", []),
                         "prep_time": data.get("prep_time", "Unknown"),
-                        "cook_time": recipe_cook_time,
-                        "cuisine": recipe_cuisine,
-                        "diet": recipe_diet,
+                        "cook_time": data.get("cook_time", "Unknown"),
                         "image_url": data.get("image_url", "")
                     })
 
@@ -111,7 +106,6 @@ def compute_tfidf_vectors(recipes):
         return vectorizer, recipe_vectors
 
     print("Computing TF-IDF vectors...")
-    
     vectorizer = TfidfVectorizer(stop_words='english')
 
     print(f"DEBUG: Number of unique recipes -> {len(recipes)}")
@@ -120,14 +114,7 @@ def compute_tfidf_vectors(recipes):
 
     for recipe in recipes:
         if isinstance(recipe, dict):  # Ensure it's a dictionary
-            text = " ".join([
-                recipe.get("description", ""), 
-                " ".join(recipe.get("ingredients", [])), 
-                recipe.get("cuisine", ""), 
-                recipe.get("diet", ""), 
-                str(recipe.get("cook_time", ""))
-
-            ])
+            text = recipe.get("description", "") + " " + " ".join(recipe.get("ingredients", []))
             recipe_texts.append(text)
 
     print(f"DEBUG: Number of processed recipe texts -> {len(recipe_texts)}")

@@ -7,28 +7,50 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from rapidfuzz import process
 import pickle
-import re
+import requests
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
+import json
+
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")  # Set this in your environment variables
+
+API_URL = "https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct"  # Free model
+HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+
+def get_huggingface_response(prompt):
+    data = {"inputs": prompt}
+    response = requests.post(API_URL, headers=HEADERS, json=data)
+
+    if response.status_code == 200:
+        return response.json()[0]["generated_text"]
+    else:
+        return f"Error: {response.json()}"
+
+# Example usage:
+user_input = "sing a song for me"
+bot_response = get_huggingface_response(user_input)
+print(bot_response)
+
 # Load trained spaCy model
-MODEL_PATH = "ner_model"
+MODEL_PATH = "../ner_model"
 if os.path.exists(MODEL_PATH):
+    print("Loading trained spaCy model...")
     try:
-        print("Loading trained spaCy model...")
         nlp = spacy.load(MODEL_PATH)
     except Exception as e:
         print(f"Error loading spaCy model: {e}")
         nlp = None
 else:
     print("Model not found! Make sure to train it first.")
-    nlp = None
+    nlp = None  # Prevents crashes if model is missing
 
 # Load cached recipes and ingredient index
-CACHE_FILE = "cached_recipes.json"
-TFIDF_CACHE_FILE = "tfidf_data.pkl"
-SUBSTITUTES_FILE = "substituents.json"
+CACHE_FILE = "../cached_recipes.json"
+TFIDF_CACHE_FILE = "../tfidf_data.pkl"
+SUBSTITUTES_FILE = "../substituents.json"
+# memory = ConversationBufferMemory(input_key="query", memory_key="chat_history")
 
 if os.path.exists(SUBSTITUTES_FILE):
     try:
@@ -42,12 +64,13 @@ else:
     print("Substitutes file not found! Please provide substituents.json.")
     SUBSTITUTES = {}
 
+
 if os.path.exists(CACHE_FILE):
     try:
         with open(CACHE_FILE, "r") as f:
             cached_data = json.load(f)
-        recipes = cached_data.get("recipes", [])
-        ingredient_index = cached_data.get("ingredient_index", {})
+        recipes = cached_data.get("recipes", [])  # Now a list
+        ingredient_index = cached_data.get("ingredient_index", {})  # Maps ingredient -> recipe IDs
         print(f"Loaded {len(recipes)} unique recipes and {len(ingredient_index)} indexed ingredients.")
     except Exception as e:
         print(f"Error loading recipe cache: {e}")
@@ -67,93 +90,113 @@ if os.path.exists(TFIDF_CACHE_FILE):
         vectorizer, recipe_vectors = None, None
 else:
     print("TF-IDF cache not found! Run fetch_training_data.py first.")
-    vectorizer, recipe_vectors = None, None
+    vectorizer, recipe_vectors = None, None  # Prevents crashes
 
-# Extract ingredients using spaCy NER
+# OpenAI model for intent classification
+# load_dotenv()  # Load environment variables
+# llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key="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")
+# intent_prompt = PromptTemplate(
+#     input_variables=["query"],
+#     template="Determine the intent of the following text: {query}. Respond with 'greeting' or 'query'."
+# )
+# intent_chain = LLMChain(llm=llm, prompt=intent_prompt)
+
+# def classify_intent(user_input):
+#     return intent_chain.run(user_input).strip().lower()
+
+# Function to extract ingredients using spaCy NER
 def extract_ingredients(user_input):
     if not nlp:
         print("Warning: NLP model is missing. No ingredients will be detected.")
         return []
-    doc = nlp(user_input)
-    return [ent.text.lower() for ent in doc.ents if ent.label_ == "INGREDIENT"]
 
-# Find recipes by matching extracted ingredients
+    doc = nlp(user_input)
+    ingredients = [ent.text.lower() for ent in doc.ents if ent.label_ == "INGREDIENT"]
+    return ingredients
+
+# Function to find recipes by extracted ingredients
 def find_recipes_by_ingredients(detected_ingredients):
-    recipe_ids = set()
+    """Retrieve recipes based on detected ingredients using the ingredient index."""
+    if not detected_ingredients:
+        return []
+
+    recipe_ids = set()  # Avoid duplicate recipes
     for ingredient in detected_ingredients:
-        # Fuzzy match ingredient name
-        matches = process.extract(ingredient, ingredient_index.keys(), score_cutoff=80)
-        for match, _ in matches:
-            recipe_ids.update(ingredient_index.get(match, []))
+        recipe_ids.update(ingredient_index.get(ingredient, []))  # Fetch recipe IDs
+
+    # Convert IDs to actual recipes
     return [recipe for recipe in recipes if recipe["id"] in recipe_ids]
 
-# Extract cuisine and cook time from the query
-def extract_cuisine_and_time(user_input):
-    cuisine_keywords = ["italian", "indian", "mexican", "chinese", "french", "thai", "greek"]
-    extracted_cuisine, extracted_time = None, None
-
-    for word in user_input.lower().split():
-        if word in cuisine_keywords:
-            extracted_cuisine = word.capitalize()
-            break
-
-    time_match = re.search(r"(\d+)\s*(minutes|min|mins)", user_input, re.IGNORECASE)
-    if time_match:
-        extracted_time = int(time_match.group(1))
-
-    return extracted_cuisine, extracted_time
-
-# Find the best recipes using TF-IDF
+# Function to find best recipes using TF-IDF similarity
 def find_best_recipes(user_input):
     if not vectorizer or recipe_vectors is None or recipe_vectors.shape[0] == 0:
         print("Warning: TF-IDF data is missing or empty. No recommendations will be made.")
         return []
 
-    extracted_cuisine, extracted_time = extract_cuisine_and_time(user_input)
-    print(f"Extracted Cuisine: {extracted_cuisine}, Extracted Time: {extracted_time}")
-
+    # Convert user input to a TF-IDF vector
     user_vector = vectorizer.transform([user_input])
+
+    # Compute cosine similarity
     similarities = cosine_similarity(user_vector, recipe_vectors).flatten()
-    top_indices = similarities.argsort()[-10:][::-1]  # Get top 10 initially
+    top_indices = similarities.argsort()[-3:][::-1]  # Highest to lowest similarity
 
-    filtered_recipes = []
-    for idx in top_indices:
-        recipe = recipes[idx]
-        if extracted_cuisine and recipe.get("cuisine", "").lower() != extracted_cuisine.lower():
-            continue
-        if extracted_time:
-            recipe_time = recipe.get("cook_time", 0)
-            if not (recipe_time >= extracted_time - 5 and recipe_time <= extracted_time + 5):
-                continue
-        filtered_recipes.append(recipe)
+    # Filter out low-similarity matches
+    valid_indices = [i for i in top_indices if similarities[i] > 0.1]
 
-    if not filtered_recipes:
-        filtered_recipes = [recipes[i] for i in top_indices if i < len(recipes)]
-    
-    return filtered_recipes[:3]
+    if not valid_indices:
+        print("No relevant recipes found.")
+        return []
 
-# Process user query
+    return [recipes[i] for i in valid_indices if i < len(recipes)] 
+
+
+from transformers import pipeline
+
+# Load Hugging Face zero-shot classifier
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+
+def classify_intent(query):
+    labels = ["recipe", "greeting"]
+    result = classifier(query, labels)
+
+    intent = result["labels"][0]  # Get top predicted intent
+    confidence = result["scores"][0]
+
+    print(f"Intent Classification -> Query: {query}, Intent: {intent}, Confidence: {confidence}")
+    return intent
+
 @app.route("/process", methods=["POST"])
 def process_query():
     try:
         data = request.json
         user_input = data.get("text", "").strip()
+
         if not user_input:
             return jsonify({"error": "Empty input"}), 400
 
         print(f"User Query: {user_input}")
 
+        # Classify user intent
+        intent = classify_intent(user_input)
+
+        if intent == "greeting":
+            return jsonify({"message": get_huggingface_response(user_input)})  # Call Hugging Face API for response
+
+        # If not greeting, process as a recipe-related query
         detected_ingredients = extract_ingredients(user_input)
         print(f"Detected Ingredients: {detected_ingredients}")
 
         ingredient_based_recipes = find_recipes_by_ingredients(detected_ingredients)
         best_recipes = find_best_recipes(user_input)
 
+        # Combine recipes and remove duplicates
         all_recipes = {r["id"]: r for r in ingredient_based_recipes + best_recipes}.values()
 
         if not all_recipes:
+            print("No matching recipes found.")
             return jsonify({"recipes": {}, "message": "No matching recipes found."})
 
+        # Format response
         response_recipes = {}
         key_ingredient = detected_ingredients[0] if detected_ingredients else "General"
 
@@ -165,38 +208,43 @@ def process_query():
                 "instructions": recipe["instructions"],
                 "prep_time": recipe["prep_time"],
                 "cook_time": recipe["cook_time"],
-                "cuisine": recipe.get("cuisine", "Unknown"),
-                "diet": recipe.get("diet", "Unknown"),
                 "image_url": recipe.get("image_url", "")
             })
-
-        return jsonify({"recipes": response_recipes})
+            return jsonify({"recipes": response_recipes})
 
     except Exception as e:
         print(f"ERROR: {e}")
         return jsonify({"error": "SORRY, there was an error processing your request."}), 500
 
-# Get ingredient substitutes
+
 @app.route("/get_substitutes", methods=["POST"])
 def get_substitutes():
     try:
         data = request.json
+        
         ingredients = data.get("ingredients", [])
 
-        if not isinstance(ingredients, list):
-            ingredients = [ingredients]
+        if not ingredients:
+            return jsonify({"error": "No ingredients provided"}), 400
 
+        if not isinstance(ingredients, list):
+            ingredients = [ingredients] if ingredients else []
+    
         substitutes = []
+        threshold=80
         for ingredient in ingredients:
-            matches = process.extract(ingredient, SUBSTITUTES.keys(), score_cutoff=80)
+            matches = process.extract(ingredient, SUBSTITUTES.keys(), score_cutoff=threshold)
             if matches:
-                substitutes.extend(SUBSTITUTES.get(matches[0][0], []))
+                best_match = matches[0][0]  # Get the best match (highest score)
+                substitutes.extend(SUBSTITUTES.get(best_match, []))
 
         return jsonify({"substitutes": substitutes})
 
     except Exception as e:
         print(f"ERROR in /get_substitutes: {e}")
         return jsonify({"error": "SORRY, there was an error processing your request."}), 500
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
