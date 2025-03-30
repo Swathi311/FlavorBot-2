@@ -34,7 +34,7 @@ bot_response = get_huggingface_response(user_input)
 print(bot_response)
 
 # Load trained spaCy model
-MODEL_PATH = "../ner_model"
+MODEL_PATH = "./ner_model"
 if os.path.exists(MODEL_PATH):
     print("Loading trained spaCy model...")
     try:
@@ -47,9 +47,9 @@ else:
     nlp = None  # Prevents crashes if model is missing
 
 # Load cached recipes and ingredient index
-CACHE_FILE = "../cached_recipes.json"
-TFIDF_CACHE_FILE = "../tfidf_data.pkl"
-SUBSTITUTES_FILE = "../substituents.json"
+CACHE_FILE = "./cached_recipes.json"
+TFIDF_CACHE_FILE = "./tfidf_data.pkl"
+SUBSTITUTES_FILE = "./substituents.json"
 # memory = ConversationBufferMemory(input_key="query", memory_key="chat_history")
 
 if os.path.exists(SUBSTITUTES_FILE):
@@ -92,17 +92,6 @@ else:
     print("TF-IDF cache not found! Run fetch_training_data.py first.")
     vectorizer, recipe_vectors = None, None  # Prevents crashes
 
-# OpenAI model for intent classification
-# load_dotenv()  # Load environment variables
-# llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key="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")
-# intent_prompt = PromptTemplate(
-#     input_variables=["query"],
-#     template="Determine the intent of the following text: {query}. Respond with 'greeting' or 'query'."
-# )
-# intent_chain = LLMChain(llm=llm, prompt=intent_prompt)
-
-# def classify_intent(user_input):
-#     return intent_chain.run(user_input).strip().lower()
 
 # Function to extract ingredients using spaCy NER
 def extract_ingredients(user_input):
@@ -180,7 +169,8 @@ def process_query():
         intent = classify_intent(user_input)
 
         if intent == "greeting":
-            return jsonify({"message": get_huggingface_response(user_input)})  # Call Hugging Face API for response
+            response = get_huggingface_response(user_input)
+            return jsonify({"message": response})
 
         # If not greeting, process as a recipe-related query
         detected_ingredients = extract_ingredients(user_input)

@@ -56,30 +56,27 @@ const FlavorBot = () => {
     }
   };
   
-  
-  
-  
 
   const handleSend = async () => {
     if (userInput.trim() === "") return;
-
+  
     const newMessage = { text: userInput, sender: "user" };
     setMessages([...messages, newMessage]);
     setUserInput("");
-
+  
     if (waitingForIngredients) {
-      console.log(userInput)
+      console.log(userInput);
       fetchSubstitutes(userInput);
       setWaitingForIngredients(false);
       return;
     }
-
+  
     try {
       const response = await axios.post("http://127.0.0.1:8000/process", { text: userInput });
       const responseData = response.data;
      
       let botResponse = responseData.message || "Sorry, there was an error processing your request.";
-
+  
       if (responseData.recipes) {
         const responseRecipes = Object.values(responseData.recipes).flat();
         if (responseRecipes.length > 0) {
@@ -102,15 +99,15 @@ const FlavorBot = () => {
                   />
                 </Box>
               )}
-
+  
               <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#555' }}>
                 {recipe.description}
               </Typography>
-
+  
               <Typography variant="subtitle2" sx={{ mt: 1, color: '#666' }}>
                 <strong>Prep Time:</strong> {recipe.prep_time} mins | <strong>Cook Time:</strong> {recipe.cook_time} mins
               </Typography>
-
+  
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 1, color: '#444' }}>
                 Ingredients:
               </Typography>
@@ -119,7 +116,7 @@ const FlavorBot = () => {
                   - {ing}
                 </Typography>
               ))}
-
+  
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 1, color: '#444' }}>
                 Instructions:
               </Typography>
@@ -132,20 +129,24 @@ const FlavorBot = () => {
           ));
         }
       }
-
+  
       const botMessage = { text: botResponse, sender: "bot" };
       setMessages((prev) => [...prev, botMessage]);
-      
-      // Ask if user has all ingredients
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { text: "Do you have all the ingredients?", sender: "bot", options: true }]);
-      }, 500);
+  
+      //  Only ask for ingredients if it's a recipe query
+      if (responseData.recipes && Object.keys(responseData.recipes).length > 0) {
+        setTimeout(() => {
+          setMessages((prev) => [...prev, { text: "Do you have all the ingredients?", sender: "bot", options: true }]);
+        }, 500);
+      }
+  
     } catch (error) {
       console.error("Error processing text:", error);
       const botMessage = { text: "Sorry, there was an error processing your request.", sender: "bot" };
       setMessages((prev) => [...prev, botMessage]);
     }
   };
+  
   const handleUserResponse = (response) => {
     setMessages((prev) => [...prev, { text: response, sender: "user" }]);
     // Further processing based on response
