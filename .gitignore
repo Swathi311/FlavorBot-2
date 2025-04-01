@@ -25,4 +25,6 @@ yarn-error.log*
 
 
 backend/serviceAccountKey.json
+
+.venv/
 src/firebase/flavorbot-8ace7-firebase-adminsdk-w09ei-c8bc67f813.json
