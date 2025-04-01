@@ -8,30 +8,29 @@ from sklearn.metrics.pairwise import cosine_similarity
 from rapidfuzz import process
 import pickle
 import requests
+import subprocess
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 import json
 
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")  # Set this in your environment variables
+def get_ollama_response(prompt):
+    try:
+        command = ["ollama", "run", "llama3.2", prompt]
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-API_URL = "https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct"  # Free model
-HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-
-def get_huggingface_response(prompt):
-    data = {"inputs": prompt}
-    response = requests.post(API_URL, headers=HEADERS, json=data)
-
-    if response.status_code == 200:
-        return response.json()[0]["generated_text"]
-    else:
-        return f"Error: {response.json()}"
-
-# Example usage:
-user_input = "sing a song for me"
-bot_response = get_huggingface_response(user_input)
-print(bot_response)
+        if result.returncode == 0:
+          
+            return result.stdout.strip()
+        else:
+          
+            print(f"Error: {result.stderr}")
+            return "Error processing your request"
+    except Exception as e:
+        print(f"Exception: {str(e)}")
+        return "Error processing your request"
 
 # Load trained spaCy model
 MODEL_PATH = "./ner_model"
@@ -50,7 +49,6 @@ else:
 CACHE_FILE = "./cached_recipes.json"
 TFIDF_CACHE_FILE = "./tfidf_data.pkl"
 SUBSTITUTES_FILE = "./substituents.json"
-# memory = ConversationBufferMemory(input_key="query", memory_key="chat_history")
 
 if os.path.exists(SUBSTITUTES_FILE):
     try:
@@ -169,7 +167,7 @@ def process_query():
         intent = classify_intent(user_input)
 
         if intent == "greeting":
-            response = get_huggingface_response(user_input)
+            response = get_ollama_response(user_input)
             return jsonify({"message": response})
 
         # If not greeting, process as a recipe-related query
