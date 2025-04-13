@@ -1,88 +1,45 @@
+**🍳 FlavorBot**
+FlavorBot is an AI-powered recipe chatbot that helps users discover personalized recipes based on their ingredients, dietary needs, and natural language queries. It combines NLP intelligence with a seamless frontend to deliver smart and interactive cooking assistance.
+
+**🔍 Features**
+
+<ul>
+  <li>spaCy NER + VSM for smart recipe retrieval</li>
+  <li>LLaMA model for human-like chat</li>
+  <li>BERT classifier for intent detection</li>
+  <li>Ingredient substitution support</li>
+  <li>Responsive ReactJS frontend</li>
+  <li>Firebase auth (Gmail, phone, email)</li>
+</ul>
+
+
 **SAMPLE SNAPS:**
 
-Login Page
-<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/b7933c06-ed55-4ac1-ac2b-4c70f0ed62db" />
+**Login Page**  
+<img width="500" alt="Screenshot" src="https://github.com/user-attachments/assets/b7933c06-ed55-4ac1-ac2b-4c70f0ed62db" />
 
-Chat with LLama3.2
-<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/881ddf9e-ac08-456b-b895-ba8e5b530efb" />
-<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/7e69c916-5567-4d8d-9c16-a373f1d7512e" />
+**Chat with LLama3.2**  
+<p float="left">
+  <img width="500" alt="Screenshot" src="https://github.com/user-attachments/assets/881ddf9e-ac08-456b-b895-ba8e5b530efb" />
+  <img width="500" alt="Screenshot" src="https://github.com/user-attachments/assets/7e69c916-5567-4d8d-9c16-a373f1d7512e" />
+</p>
 
-Recipe response
-<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/1d0c10cd-e47e-4900-aa4a-5a4db5a400ae" />
+**Recipe response**  
+<img width="500" alt="Screenshot" src="https://github.com/user-attachments/assets/1d0c10cd-e47e-4900-aa4a-5a4db5a400ae" />
 
-Substituent ingredient fetching
-<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/59d15bfa-961b-4166-8cdb-b5f11bea9a6a" />
-
-
+**Substituent ingredient fetching**  
+<img width="500" alt="Screenshot" src="https://github.com/user-attachments/assets/59d15bfa-961b-4166-8cdb-b5f11bea9a6a" />
 
 
-# Getting Started with Create React App
+## Getting Started
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+To run the backend
+<pre>
+<code>python app.py</code>
+</pre>
 
-## Available Scripts
+To run the frontend
+<pre>
+<code>npm start</code>
+</pre>
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
