@@ -1,6 +1,17 @@
-SAMPLE SNAPS:
+**SAMPLE SNAPS:**
 
-<img width="1678" alt="Screenshot 2025-04-13 at 8 17 05 PM" src="https://github.com/user-attachments/assets/b7933c06-ed55-4ac1-ac2b-4c70f0ed62db" />
+Login Page
+<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/b7933c06-ed55-4ac1-ac2b-4c70f0ed62db" />
+
+Chat with LLama3.2
+<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/881ddf9e-ac08-456b-b895-ba8e5b530efb" />
+<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/7e69c916-5567-4d8d-9c16-a373f1d7512e" />
+
+Recipe response
+<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/1d0c10cd-e47e-4900-aa4a-5a4db5a400ae" />
+
+Substituent ingredient fetching
+<img width="1000" alt="Screenshot" src="https://github.com/user-attachments/assets/59d15bfa-961b-4166-8cdb-b5f11bea9a6a" />
 
 
 
