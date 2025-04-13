@@ -1,5 +1,5 @@
 **🍳 FlavorBot**
-FlavorBot is an AI-powered recipe chatbot that helps users discover personalized recipes based on their ingredients, dietary needs, and natural language queries. It combines NLP intelligence with a seamless frontend to deliver smart and interactive cooking assistance.
+<p>FlavorBot is an AI-powered recipe chatbot that helps users discover personalized recipes based on their ingredients, dietary needs, and natural language queries. It combines NLP intelligence with a seamless frontend to deliver smart and interactive cooking assistance.</p>
 
 **🔍 Features**
 
