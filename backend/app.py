@@ -33,7 +33,7 @@ def get_ollama_response(prompt):
         return "Error processing your request"
 
 # Load trained spaCy model
-MODEL_PATH = "./ner_model"
+MODEL_PATH = "../ner_model"
 if os.path.exists(MODEL_PATH):
     print("Loading trained spaCy model...")
     try:
@@ -46,9 +46,9 @@ else:
     nlp = None  # Prevents crashes if model is missing
 
 # Load cached recipes and ingredient index
-CACHE_FILE = "./cached_recipes.json"
-TFIDF_CACHE_FILE = "./tfidf_data.pkl"
-SUBSTITUTES_FILE = "./substituents.json"
+CACHE_FILE = "../cached_recipes.json"
+TFIDF_CACHE_FILE = "../tfidf_data.pkl"
+SUBSTITUTES_FILE = "../substituents.json"
 
 if os.path.exists(SUBSTITUTES_FILE):
     try:
